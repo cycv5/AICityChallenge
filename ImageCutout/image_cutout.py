@@ -21,7 +21,7 @@ def apply_mask(img, h_mask, w_mask, mask_size):
     return img
 
 
-def main(path, out_path):
+def main(path, out_path, mask_size_multiplier):
     if out_path == "":
         out_path = path
     count = 0
@@ -30,7 +30,7 @@ def main(path, out_path):
             f_path = os.path.join(args.img_path, filename)
             img = cv2.imread(f_path)
             height, width, c = img.shape
-            mask_size = (min(height, width)) // 5
+            mask_size = (min(height, width)) * mask_size_multiplier
             h_mask = random.randint(0, height-mask_size-1)
             w_mask = random.randint(0, width-mask_size-1)
             new_img = apply_mask(img, h_mask, w_mask, mask_size)
@@ -45,5 +45,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("--img_path", type=str)
     parser.add_argument("--out_path", default="", type=str)
+    parser.add_argument("--mask_size_multiplier", default=0.2, type=int)
     args = parser.parse_args()
-    main(args.img_path, args.out_path)
+    main(args.img_path, args.out_path, args.mask_size_multiplier)

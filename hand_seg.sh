@@ -1,5 +1,5 @@
 echo "Setting up the environment"
-cd EgoHOS
+cd EgoHOS-main
 pip install -r requirements.txt
 pip install -U openmim
 mim install mmcv-full==1.6.0

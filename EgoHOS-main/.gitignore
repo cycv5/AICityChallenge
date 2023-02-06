@@ -1,0 +1,16 @@
+*.jpg
+*.png
+
+*.pt
+*.pth
+
+*.zip
+*.tar
+
+# /mmsegmentation
+/data
+/data_to_release
+/testimages
+/testvideos
+
+/mmsegmentation/work_dirs_exp

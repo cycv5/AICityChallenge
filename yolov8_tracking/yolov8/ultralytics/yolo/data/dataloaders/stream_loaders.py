@@ -206,7 +206,7 @@ class LoadImages:
             for _ in range(self.vid_stride):
                 self.cap.grab()
             ret_val, im0 = self.cap.retrieve()
-            
+
             # TODO: Image Preprocess to im0 Here!!! #####
 
             while not ret_val:

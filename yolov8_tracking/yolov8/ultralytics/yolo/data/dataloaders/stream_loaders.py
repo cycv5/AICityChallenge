@@ -18,6 +18,9 @@ from ultralytics.yolo.data.utils import IMG_FORMATS, VID_FORMATS
 from ultralytics.yolo.utils import LOGGER, ROOT, is_colab, is_kaggle, ops
 from ultralytics.yolo.utils.checks import check_requirements
 
+import EgoHOS.mmsegmentation.predict_image as handseg
+import Utils.predict_tray as predict_tray
+
 
 class LoadStreams:
     # YOLOv8 streamloader, i.e. `python detect.py --source 'rtsp://example.com/media.mp4'  # RTSP, RTMP, HTTP streams`
@@ -184,6 +187,8 @@ class LoadImages:
         self.auto = auto
         self.transforms = transforms  # optional
         self.vid_stride = vid_stride  # video frame-rate stride
+        # TODO: add attribute tray
+        # self.tray = None, None
         if any(videos):
             self._new_video(videos[0])  # new video
         else:
@@ -208,6 +213,26 @@ class LoadImages:
             ret_val, im0 = self.cap.retrieve()
 
             # TODO: Image Preprocess to im0 Here!!! #####
+            # TODO: after hand segmentation, determine if predict tray should kick in
+            # If current tray prediction is based on guesses, predict_tray must kick in
+            # Keep running predict_tray until we find a frame where hand/object is not covering the tray AND
+            # the prediction result is not a guess.
+            # Every second (tentative) after, refresh the tray prediction if hand/object is not covering the tray.
+
+            """
+            if not first_found:
+                coord1, coord2, guess = predict_tray(im0)
+                if (hand not on tray) and (not guess):
+                    first_found = True
+                self.tray = coord1, coord2
+            else:
+                if counter == 60:
+                    coord1, coord2, guess = predict_tray(im0)
+                    if (hand not on tray) and (not guess):
+                        self.tray = coord1, coord2
+                    
+            return self.tray with the function
+            """
 
             while not ret_val:
                 self.count += 1

@@ -258,6 +258,9 @@ def run(
                                 (f'{id} {conf:.2f}' if hide_class else f'{id} {names[c]} {conf:.2f}'))
                             color = colors(c, True)
                             annotator.box_label(bbox, label, color=color)
+
+                            # show tray label
+                            annotator.box_label(tray, "tray", color=colors(0, True))
                             
                             if save_trajectories and tracking_method == 'strongsort':
                                 q = output[7]

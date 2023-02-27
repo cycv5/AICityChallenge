@@ -18,9 +18,12 @@ from ultralytics.yolo.data.utils import IMG_FORMATS, VID_FORMATS
 from ultralytics.yolo.utils import LOGGER, ROOT, is_colab, is_kaggle, ops
 from ultralytics.yolo.utils.checks import check_requirements
 
+# For Colab
+import sys
+sys.path.append('/content/TBD')
+
 import EgoHOS.mmsegmentation.predict_image as handseg
-import Utils.predict_tray
-from Utils.predict_tray import predict_tray
+import EgoHOS.mmsegmentation.predict_tray as ptray
 
 
 class LoadStreams:
@@ -232,13 +235,13 @@ class LoadImages:
             h = handseg.HandSegmentor()
             im1 = h.process_video_frame(im0)
             if not self.first_found:
-                coord1, coord2, guess = Utils.predict_tray.predict_tray(im0)
+                coord1, coord2, guess = ptray.predict_tray.predict_tray(im0)
                 if (not hand_on_tray(im1)) and (not guess):
                     self.first_found = True
                 self.tray = (coord1, coord2)
             else:
                 if self.counter == 60:
-                    coord1, coord2, guess = Utils.predict_tray.predict_tray(im0)
+                    coord1, coord2, guess = ptray.predict_tray.predict_tray(im0)
                     if (not hand_on_tray(im1)) and (not guess):
                         self.tray = (coord1, coord2)
 

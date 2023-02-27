@@ -8,7 +8,8 @@ import sys
 
 
 class HandSegmentor:
-    def __init__(self, config_file, checkpoint_file):
+    def __init__(self, config_file="./work_dirs/seg_twohands_ccda/seg_twohands_ccda.py",
+                 checkpoint_file="./work_dirs/seg_twohands_ccda/best_mIoU_iter_56000.pth"):
         self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
     def process_video(self, video_dir, out_dir):  # Process the entire video and output the result
@@ -37,14 +38,14 @@ class HandSegmentor:
         seg_result = inference_segmentor(self.model, img)[0]
         inv_seg_result = np.where(seg_result == 0, 1, 0)
         masked_image = (img.transpose() * inv_seg_result.transpose()).transpose()
-        return masked_image
+        return masked_image  # (1080, 1920, 3)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument("--config_file", default='./work_dirs/upernet_swin_base_patch4_window12_512x512_160k_egohos_handobj2_pretrain_480x360_22K/upernet_swin_base_patch4_window12_512x512_160k_egohos_handobj2_pretrain_480x360_22K.py',
+    parser.add_argument("--config_file", default='./work_dirs/seg_twohands_ccda/seg_twohands_ccda.py',
                         type=str)
-    parser.add_argument("--checkpoint_file", default='./work_dirs/upernet_swin_base_patch4_window12_512x512_160k_egohos_handobj2_pretrain_480x360_22K/best_mIoU_iter_42000.pth',
+    parser.add_argument("--checkpoint_file", default='./work_dirs/seg_twohands_ccda/best_mIoU_iter_56000.pth',
                         type=str)
     parser.add_argument("--video_dir", default='../../data/test/video', type=str)
     parser.add_argument("--out_dir", default='../../data/test/out', type=str)

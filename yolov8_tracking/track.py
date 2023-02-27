@@ -145,7 +145,7 @@ def run(
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile(), Profile())
     curr_frames, prev_frames = [None] * bs, [None] * bs
     for frame_idx, batch in enumerate(dataset):
-        path, im, im0s, vid_cap, s = batch
+        path, im, im0s, vid_cap, s, tray = batch
         visualize = increment_path(save_dir / Path(path[0]).stem, mkdir=True) if visualize else False
         with dt[0]:
             im = torch.from_numpy(im).to(device)

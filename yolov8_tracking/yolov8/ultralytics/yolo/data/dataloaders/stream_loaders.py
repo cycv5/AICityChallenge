@@ -19,7 +19,8 @@ from ultralytics.yolo.utils import LOGGER, ROOT, is_colab, is_kaggle, ops
 from ultralytics.yolo.utils.checks import check_requirements
 
 import EgoHOS.mmsegmentation.predict_image as handseg
-import Utils.predict_tray as predict_tray
+import Utils.predict_tray
+from Utils.predict_tray import predict_tray
 
 
 class LoadStreams:
@@ -188,7 +189,9 @@ class LoadImages:
         self.transforms = transforms  # optional
         self.vid_stride = vid_stride  # video frame-rate stride
         # TODO: add attribute tray
-        # self.tray = None, None
+        self.tray = (None, None)
+        self.first_found = False
+        self.counter = 0
         if any(videos):
             self._new_video(videos[0])  # new video
         else:
@@ -218,21 +221,31 @@ class LoadImages:
             # Keep running predict_tray until we find a frame where hand/object is not covering the tray AND
             # the prediction result is not a guess.
             # Every second (tentative) after, refresh the tray prediction if hand/object is not covering the tray.
+            def hand_on_tray(img):
+                ret = False
+                for i in range(250, 880):
+                    for j in range(500, 1350):
+                        if (img[i][j] == np.array([0, 0, 0])).all():
+                            ret = True
+                return ret
 
-            """
-            if not first_found:
-                coord1, coord2, guess = predict_tray(im0)
-                if (hand not on tray) and (not guess):
-                    first_found = True
-                self.tray = coord1, coord2
+            h = handseg.HandSegmentor()
+            im1 = h.process_video_frame(im0)
+            if not self.first_found:
+                coord1, coord2, guess = Utils.predict_tray.predict_tray(im0)
+                if (not hand_on_tray(im1)) and (not guess):
+                    self.first_found = True
+                self.tray = (coord1, coord2)
             else:
-                if counter == 60:
-                    coord1, coord2, guess = predict_tray(im0)
-                    if (hand not on tray) and (not guess):
-                        self.tray = coord1, coord2
-                    
-            return self.tray with the function
-            """
+                if self.counter == 60:
+                    coord1, coord2, guess = Utils.predict_tray.predict_tray(im0)
+                    if (not hand_on_tray(im1)) and (not guess):
+                        self.tray = (coord1, coord2)
+
+            if self.counter >= 60:
+                self.counter = 0
+            else:
+                self.counter += 1
 
             while not ret_val:
                 self.count += 1
@@ -255,13 +268,13 @@ class LoadImages:
             s = f'image {self.count}/{self.nf} {path}: '
 
         if self.transforms:
-            im = self.transforms(im0)  # transforms
+            im = self.transforms(im1)  # transforms
         else:
             im = LetterBox(self.imgsz, self.auto, stride=self.stride)(image=im0)
             im = im.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
             im = np.ascontiguousarray(im)  # contiguous
 
-        return path, im, im0, self.cap, s
+        return path, im, im0, self.cap, s, self.tray
 
     def _new_video(self, path):
         # Create a new video capture object

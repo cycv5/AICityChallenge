@@ -20,10 +20,13 @@ from ultralytics.yolo.utils.checks import check_requirements
 
 # For Colab
 import sys
-sys.path.append('/content/TBD')
+base_path = Path(__file__).parent.resolve()
+root_path = (base_path / "../../../../../../").resolve()
+print("Root directory for project: " + str(root_path))
+sys.path.append(str(root_path))
 
 import EgoHOS.mmsegmentation.predict_image as handseg
-import EgoHOS.mmsegmentation.predict_tray as ptray
+from EgoHOS.mmsegmentation.predict_tray import predict_tray
 
 
 class LoadStreams:
@@ -192,7 +195,7 @@ class LoadImages:
         self.transforms = transforms  # optional
         self.vid_stride = vid_stride  # video frame-rate stride
         # TODO: add attribute tray
-        self.tray = (None, None)
+        self.tray = ((500, 250), (1350, 880))
         self.first_found = False
         self.counter = 0
         if any(videos):
@@ -231,25 +234,31 @@ class LoadImages:
                         if (img[i][j] == np.array([0, 0, 0])).all():
                             ret = True
                 return ret
-
-            h = handseg.HandSegmentor()
-            im1 = h.process_video_frame(im0)
+            # base_path = Path(__file__).parent.resolve()
+            # work_path = (base_path / "../../../../../../EgoHOS/mmsegmentation/work_dirs").resolve()
+            # config_path = (work_path / "seg_twohands_ccda/seg_twohands_ccda.py").resolve()
+            # checkpt_path = (work_path / "seg_twohands_ccda/best_mIoU_iter_56000.pth").resolve()
+            # h = handseg.HandSegmentor(str(config_path), str(checkpt_path))
+            # im1 = h.process_video_frame(im0).astype('float32')
+            print("first_found: ", self.first_found)
+            print("Counter: ", self.counter)
             if not self.first_found:
-                coord1, coord2, guess = ptray.predict_tray.predict_tray(im0)
-                if (not hand_on_tray(im1)) and (not guess):
+                coord1, coord2, pred = predict_tray(im0)
+                # if (not hand_on_tray(im1)) and pred:
+                if pred:  # not a guess
                     self.first_found = True
                 self.tray = (coord1, coord2)
             else:
                 if self.counter == 60:
-                    coord1, coord2, guess = ptray.predict_tray.predict_tray(im0)
-                    if (not hand_on_tray(im1)) and (not guess):
+                    coord1, coord2, pred = predict_tray(im0)
+                    if pred:
                         self.tray = (coord1, coord2)
 
             if self.counter >= 60:
                 self.counter = 0
             else:
                 self.counter += 1
-
+            print("Current tray: ", self.tray)
             while not ret_val:
                 self.count += 1
                 self.cap.release()
@@ -271,7 +280,7 @@ class LoadImages:
             s = f'image {self.count}/{self.nf} {path}: '
 
         if self.transforms:
-            im = self.transforms(im1)  # transforms
+            im = self.transforms(im0)  # transforms
         else:
             im = LetterBox(self.imgsz, self.auto, stride=self.stride)(image=im0)
             im = im.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB

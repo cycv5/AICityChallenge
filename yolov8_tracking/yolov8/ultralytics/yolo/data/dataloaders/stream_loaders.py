@@ -226,7 +226,7 @@ class LoadImages:
             # If current tray prediction is based on guesses, predict_tray must kick in
             # Keep running predict_tray until we find a frame where hand/object is not covering the tray AND
             # the prediction result is not a guess.
-            # Every second (tentative) after, refresh the tray prediction if hand/object is not covering the tray.
+            # Every 5 second (tentative) after, refresh the tray prediction if hand/object is not covering the tray.
             def hand_on_tray(img):
                 ret = False
                 for i in range(250, 880):
@@ -234,12 +234,13 @@ class LoadImages:
                         if (img[i][j] == np.array([0, 0, 0])).all():
                             ret = True
                 return ret
-            # base_path = Path(__file__).parent.resolve()
-            # work_path = (base_path / "../../../../../../EgoHOS/mmsegmentation/work_dirs").resolve()
-            # config_path = (work_path / "seg_twohands_ccda/seg_twohands_ccda.py").resolve()
-            # checkpt_path = (work_path / "seg_twohands_ccda/best_mIoU_iter_56000.pth").resolve()
-            # h = handseg.HandSegmentor(str(config_path), str(checkpt_path))
-            # im1 = h.process_video_frame(im0).astype('float32')
+            base_path = Path(__file__).parent.resolve()
+            work_path = (base_path / "../../../../../../EgoHOS/mmsegmentation/work_dirs").resolve()
+            config_path = (work_path / "seg_twohands_ccda/seg_twohands_ccda.py").resolve()
+            checkpt_path = (work_path / "seg_twohands_ccda/best_mIoU_iter_56000.pth").resolve()
+            h = handseg.HandSegmentor(str(config_path), str(checkpt_path))
+            im1 = h.process_video_frame(im0).astype('float32')
+
             print("first_found: ", self.first_found)
             print("Counter: ", self.counter)
             if not self.first_found:
@@ -249,12 +250,12 @@ class LoadImages:
                     self.first_found = True
                 self.tray = (coord1, coord2)
             else:
-                if self.counter == 60:
+                if self.counter == 300:
                     coord1, coord2, pred = predict_tray(im0)
                     if pred:
                         self.tray = (coord1, coord2)
 
-            if self.counter >= 60:
+            if self.counter >= 300:
                 self.counter = 0
             else:
                 self.counter += 1
@@ -280,9 +281,9 @@ class LoadImages:
             s = f'image {self.count}/{self.nf} {path}: '
 
         if self.transforms:
-            im = self.transforms(im0)  # transforms
+            im = self.transforms(im1)  # transforms
         else:
-            im = LetterBox(self.imgsz, self.auto, stride=self.stride)(image=im0)
+            im = LetterBox(self.imgsz, self.auto, stride=self.stride)(image=im1)
             im = im.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
             im = np.ascontiguousarray(im)  # contiguous
 

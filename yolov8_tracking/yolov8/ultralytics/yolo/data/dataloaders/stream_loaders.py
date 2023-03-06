@@ -194,16 +194,20 @@ class LoadImages:
         self.auto = auto
         self.transforms = transforms  # optional
         self.vid_stride = vid_stride  # video frame-rate stride
-        # TODO: add attribute tray
+        # TODO: add attributes
         self.tray = ((500, 250), (1350, 880))
         self.first_found = False
         self.counter = 0
+        self.deblur = False
         if any(videos):
             self._new_video(videos[0])  # new video
         else:
             self.cap = None
         assert self.nf > 0, f'No images or videos found in {p}. ' \
                             f'Supported formats are:\nimages: {IMG_FORMATS}\nvideos: {VID_FORMATS}'
+
+    def set_deblur(self, value):
+        self.deblur = value
 
     def __iter__(self):
         self.count = 0
@@ -234,6 +238,10 @@ class LoadImages:
                         if (img[i][j] == np.array([0, 0, 0])).all():
                             ret = True
                 return ret
+            if self.deblur:
+                placeholder = 0
+                # do deblur work
+
             base_path = Path(__file__).parent.resolve()
             work_path = (base_path / "../../../../../../EgoHOS/mmsegmentation/work_dirs").resolve()
             config_path = (work_path / "seg_twohands_ccda/seg_twohands_ccda.py").resolve()
@@ -287,7 +295,7 @@ class LoadImages:
             im = im.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
             im = np.ascontiguousarray(im)  # contiguous
 
-        return path, im, im0, self.cap, s, self.tray
+        return path, im, im0, self.cap, s, self.tray, self.deblur
 
     def _new_video(self, path):
         # Create a new video capture object

@@ -44,6 +44,9 @@ from yolov8.ultralytics.yolo.utils.plotting import Annotator, colors
 from trackers.multi_tracker_zoo import create_tracker
 
 
+def get_deblur():
+    return DEBLUR
+
 @torch.no_grad()
 def run(
         source='0',
@@ -145,8 +148,18 @@ def run(
     # model.warmup(imgsz=(1 if pt else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile(), Profile())
     curr_frames, prev_frames = [None] * bs, [None] * bs
+
+    # The dictionary that records the items that are seen by the network.
+    # Entries are in the format of {unique_index:(timestamp_in_frame, {class: count})}
+    # E.g. {"10": (870, {23: 115, 25: 3})} means id 10 object first enters the ROI tray at 870th frame,
+    # it is classified as class_23 115 times, and class_25 3 times.
+    see = {}
+    # storing the keys to the seen dict in the order of time.
+    keys = []
+
     for frame_idx, batch in enumerate(dataset):
-        path, im, im0s, vid_cap, s, tray = batch
+        path, im, im0s, vid_cap, s, tray, deblur = batch
+        dataset.set_deblur(False)
         visualize = increment_path(save_dir / Path(path[0]).stem, mkdir=True) if visualize else False
         with dt[0]:
             im = torch.from_numpy(im).to(device)
@@ -242,6 +255,29 @@ def run(
                         cls = output[5]
                         conf = output[6]
 
+                        if (bbox[0] >= tray[0][0] and bbox[1] >= tray[0][1] and bbox[2] <= tray[1][0] and
+                                bbox[3] <= tray[1][1]):  # in tray area
+                            # Entries are in the format of {unique_index:(timestamp_in_frame, {class: count})}
+                            if id in see:
+                                d = see[id][1]
+                                if cls in d:
+                                    if deblur:
+                                        d[cls] += 10
+                                    else:
+                                        d[cls] += 1
+                                else:
+                                    if deblur:
+                                        d[cls] = 10
+                                    else:
+                                        d[cls] = 1
+                            else:
+                                dataset.set_deblur(True)
+                                if deblur:
+                                    see[id] = (frame_idx, {cls: 10})
+                                else:
+                                    see[id] = (frame_idx, {cls: 1})
+                                keys.append(id)
+
                         if save_txt:
                             # to MOT format
                             bbox_left = output[0]
@@ -262,9 +298,6 @@ def run(
                             color = colors(c, True)
                             annotator.box_label(bbox, label, color=color)
 
-                            # show tray label
-                            annotator.box_label([tray[0][0], tray[0][1], tray[1][0], tray[1][1]], "tray",
-                                                color=colors(0, True))
 
                             if save_trajectories and tracking_method == 'strongsort':
                                 q = output[7]
@@ -274,6 +307,10 @@ def run(
                                 save_one_box(np.array(bbox, dtype=np.int16), imc,
                                              file=save_dir / 'crops' / txt_file_name / names[
                                                  c] / f'{id}' / f'{p.stem}.jpg', BGR=True)
+
+                    # show tray label
+                    annotator.box_label([tray[0][0], tray[0][1], tray[1][0], tray[1][1]], "tray",
+                                        color=colors(0, True))
 
             else:
                 pass
@@ -321,6 +358,14 @@ def run(
         LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
     if update:
         strip_optimizer(yolo_weights)  # update model (to fix SourceChangeWarning)
+
+    with open("result.txt", "a") as fd:
+        vid_id = source.split("_")[-1][:-4]
+        for i in keys:
+            tstamp, cls_d = see[i]
+            max_cls = max(cls_d)
+            if cls_d[max_cls] > 15:  # The count for this classification is > 15 frames
+                fd.write("{} {} {}\n".format(vid_id, max_cls, tstamp))
 
 
 def parse_opt():

@@ -67,6 +67,8 @@ def predict_tray(img):
         A boolean value indicating if the bbox is predicted from image OR guessed (due to recognition failure).
             True represents that the bbox is predicted.
     """
+    if img is None:
+        return (500, 250), (1350, 880), False
     h, w, _ = img.shape
     seed = (int(w / 2), int(h / 2))
     (x0, y0), (x1, y1) = detect(img, seed=seed)

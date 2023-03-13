@@ -44,9 +44,6 @@ from yolov8.ultralytics.yolo.utils.plotting import Annotator, colors
 from trackers.multi_tracker_zoo import create_tracker
 
 
-def get_deblur():
-    return DEBLUR
-
 @torch.no_grad()
 def run(
         source='0',
@@ -255,27 +252,29 @@ def run(
                         cls = output[5]
                         conf = output[6]
 
+                        cls_int = int(cls)
+
                         if (bbox[0] >= tray[0][0] and bbox[1] >= tray[0][1] and bbox[2] <= tray[1][0] and
                                 bbox[3] <= tray[1][1]):  # in tray area
                             # Entries are in the format of {unique_index:(timestamp_in_frame, {class: count})}
                             if id in see:
                                 d = see[id][1]
-                                if cls in d:
+                                if cls_int in d:
                                     if deblur:
-                                        d[cls] += 10
+                                        d[cls_int] += 10
                                     else:
-                                        d[cls] += 1
+                                        d[cls_int] += 1
                                 else:
                                     if deblur:
-                                        d[cls] = 10
+                                        d[cls_int] = 10
                                     else:
-                                        d[cls] = 1
+                                        d[cls_int] = 1
                             else:
                                 dataset.set_deblur(True)
                                 if deblur:
-                                    see[id] = (frame_idx, {cls: 10})
+                                    see[id] = (frame_idx, {cls_int: 10})
                                 else:
-                                    see[id] = (frame_idx, {cls: 1})
+                                    see[id] = (frame_idx, {cls_int: 1})
                                 keys.append(id)
 
                         if save_txt:
@@ -359,7 +358,10 @@ def run(
     if update:
         strip_optimizer(yolo_weights)  # update model (to fix SourceChangeWarning)
 
-    with open("result.txt", "a") as fd:
+    print(see)
+    result_save = ROOT / "result.txt"
+    with open(str(result_save), "a") as fd:
+        print("Writing")
         vid_id = source.split("_")[-1][:-4]
         for i in keys:
             tstamp, cls_d = see[i]

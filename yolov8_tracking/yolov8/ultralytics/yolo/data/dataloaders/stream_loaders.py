@@ -194,11 +194,16 @@ class LoadImages:
         self.auto = auto
         self.transforms = transforms  # optional
         self.vid_stride = vid_stride  # video frame-rate stride
-        # TODO: add attributes
+        # added attributes
         self.tray = ((500, 250), (1350, 880))
         self.first_found = False
         self.counter = 0
         self.deblur = False
+        base_path = Path(__file__).parent.resolve()
+        work_path = (base_path / "../../../../../../EgoHOS/mmsegmentation/work_dirs").resolve()
+        config_path = (work_path / "seg_twohands_ccda/seg_twohands_ccda.py").resolve()
+        checkpt_path = (work_path / "seg_twohands_ccda/best_mIoU_iter_56000.pth").resolve()
+        self.h = handseg.HandSegmentor(str(config_path), str(checkpt_path))
         if any(videos):
             self._new_video(videos[0])  # new video
         else:
@@ -242,15 +247,10 @@ class LoadImages:
                 placeholder = 0
                 # do deblur work
 
-            # base_path = Path(__file__).parent.resolve()
-            # work_path = (base_path / "../../../../../../EgoHOS/mmsegmentation/work_dirs").resolve()
-            # config_path = (work_path / "seg_twohands_ccda/seg_twohands_ccda.py").resolve()
-            # checkpt_path = (work_path / "seg_twohands_ccda/best_mIoU_iter_56000.pth").resolve()
-            # h = handseg.HandSegmentor(str(config_path), str(checkpt_path))
-            # im1 = h.process_video_frame(im0).astype('float32')
+            if im0 is not None:
+                im1 = self.h.process_video_frame(im0).astype('float32')
 
             print("first_found: ", self.first_found)
-            print("Counter: ", self.counter)
             if not self.first_found:
                 coord1, coord2, pred = predict_tray(im0)
                 # if (not hand_on_tray(im1)) and pred:
@@ -289,9 +289,9 @@ class LoadImages:
             s = f'image {self.count}/{self.nf} {path}: '
 
         if self.transforms:
-            im = self.transforms(im0)  # transforms
+            im = self.transforms(im1)  # transforms
         else:
-            im = LetterBox(self.imgsz, self.auto, stride=self.stride)(image=im0)
+            im = LetterBox(self.imgsz, self.auto, stride=self.stride)(image=im1)
             im = im.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
             im = np.ascontiguousarray(im)  # contiguous
 

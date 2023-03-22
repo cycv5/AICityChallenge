@@ -171,7 +171,7 @@ class LoadScreenshots:
 
 class LoadImages:
     # YOLOv8 image/video dataloader, i.e. `python detect.py --source image.jpg/vid.mp4`
-    def __init__(self, path, imgsz=640, stride=32, auto=True, transforms=None, vid_stride=1):
+    def __init__(self, path, imgsz=640, stride=32, auto=True, transforms=None, vid_stride=1, deblur_path=""):
         if isinstance(path, str) and Path(path).suffix == ".txt":  # *.txt file with img/vid/dir on each line
             path = Path(path).read_text().rsplit()
         files = []
@@ -207,6 +207,8 @@ class LoadImages:
         opt_path = (base_path / '../../../../../../NAFNet/options/test/REDS/NAFNet-width64.yml').resolve()
         opt = parse(str(opt_path), is_train=False)
         opt['dist'] = False
+        opt['path']['pretrain_network_g'] = deblur_path
+        print(opt)
         self.NAFNet = create_model(opt)
         self.deblur = False
         work_path = (base_path / "../../../../../../EgoHOS/mmsegmentation/work_dirs").resolve()

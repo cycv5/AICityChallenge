@@ -79,7 +79,8 @@ def run(
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
         retina_masks=False,
-        result_dir=""
+        result_dir="",
+        deblur_path=""
 ):
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
@@ -126,7 +127,8 @@ def run(
             stride=stride,
             auto=pt,
             transforms=getattr(model.model, 'transforms', None),
-            vid_stride=vid_stride
+            vid_stride=vid_stride,
+            deblur_path=deblur_path
         )
     vid_path, vid_writer, txt_path = [None] * bs, [None] * bs, [None] * bs
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
@@ -408,6 +410,7 @@ def parse_opt():
     parser.add_argument('--vid-stride', type=int, default=1, help='video frame-rate stride')
     parser.add_argument('--retina-masks', action='store_true', help='whether to plot masks in native resolution')
     parser.add_argument('--result-dir', help='where to save the result.txt file', default="", type=str)
+    parser.add_argument('--deblur-path', help='path to pretrained deblur NAFNet file', default="/content/TBD/NAFNet/experiments/pretrained_models/NAFNet-REDS-width64.pth", type=str)
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     opt.tracking_config = ROOT / 'trackers' / opt.tracking_method / 'configs' / (opt.tracking_method + '.yaml')

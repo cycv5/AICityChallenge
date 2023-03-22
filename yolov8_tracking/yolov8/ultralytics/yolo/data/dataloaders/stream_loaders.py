@@ -203,12 +203,12 @@ class LoadImages:
         self.tray = ((500, 250), (1350, 880))
         self.first_found = False
         self.counter = 0
-        opt_path = '../../../../../../NAFNet/options/test/REDS/NAFNet-width64.yml'
-        opt = parse(opt_path, is_train=False)
+        base_path = Path(__file__).parent.resolve()
+        opt_path = (base_path / '../../../../../../NAFNet/options/test/REDS/NAFNet-width64.yml').resolve()
+        opt = parse(str(opt_path), is_train=False)
         opt['dist'] = False
         self.NAFNet = create_model(opt)
         self.deblur = False
-        base_path = Path(__file__).parent.resolve()
         work_path = (base_path / "../../../../../../EgoHOS/mmsegmentation/work_dirs").resolve()
         config_path = (work_path / "seg_twohands_ccda/seg_twohands_ccda.py").resolve()
         checkpt_path = (work_path / "seg_twohands_ccda/best_mIoU_iter_56000.pth").resolve()

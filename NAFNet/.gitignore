@@ -1,7 +1,6 @@
 .DS_Store
 .idea/*
 logs/
-experiments
 *results*
 *__pycache__*
 *.sh

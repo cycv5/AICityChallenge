@@ -307,14 +307,12 @@ def run(
                                              file=save_dir / 'crops' / txt_file_name / names[
                                                  c] / f'{id}' / f'{p.stem}.jpg', BGR=True)
 
-                    # show tray label
-                    annotator.box_label([tray[0][0], tray[0][1], tray[1][0], tray[1][1]], "tray",
-                                        color=colors(0, True))
-
             else:
                 pass
                 # tracker_list[i].tracker.pred_n_update_all_tracks()
 
+            # show tray label
+            annotator.box_label([tray[0][0], tray[0][1], tray[1][0], tray[1][1]], "tray", color=colors(0, True))
             # Stream results
             im0 = annotator.result()
             if show_vid:

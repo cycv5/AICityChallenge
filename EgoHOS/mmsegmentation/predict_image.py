@@ -36,9 +36,13 @@ class HandSegmentor:
 
     def process_video_frame(self, img):  # Process one frame and output a tensor/array
         seg_result = inference_segmentor(self.model, img)[0]
-        inv_seg_result = np.where(seg_result == 0, 1, 0)
-        masked_image = (img.transpose() * inv_seg_result.transpose()).transpose()
-        return masked_image  # (1080, 1920, 3)
+        # inv_seg_result = np.where(seg_result == 0, 1, 0)
+        # masked_image = (img.transpose() * inv_seg_result.transpose()).transpose()
+        res = np.argwhere(seg_result != 0)
+        for ind in res:
+            img[int(ind[0]), int(ind[1])] = np.array([168, 168, 168])
+        return img
+        # return masked_image  # (1080, 1920, 3)
 
 
 if __name__ == "__main__":

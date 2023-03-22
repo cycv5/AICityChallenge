@@ -293,6 +293,7 @@ class LoadImages:
                 print("Deblurring at work")
                 inp = self.img2tensor(im0)
                 im0 = self.single_image_inference(self.NAFNet, inp)
+                im0 = cv2.cvtColor(im0, cv2.COLOR_RGB2BGR)
                 # do deblur work
 
             if im0 is not None:

@@ -11,5 +11,12 @@ curl -L -s -o work_dirs.zip "https://drive.google.com/uc?id=1LNMQ6TGf1QaCjMgTExP
 unzip work_dirs.zip
 rm work_dirs.zip
 
+echo "Setting up deblur"
+cd ../../NAFNet
+pip install -r requirements.txt
+pip install --upgrade --no-cache-dir gdown
+python3 setup.py develop --no_cuda_ext
+
+echo "Setting up YOLOv8"
 cd ../../yolov8_tracking
 pip install -r requirements.txt

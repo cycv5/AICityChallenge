@@ -264,18 +264,18 @@ def run(
                                 d = see[id][1]
                                 if cls_int in d:
                                     if deblur:
-                                        d[cls_int] += 10
+                                        d[cls_int] += 5
                                     else:
                                         d[cls_int] += 1
                                 else:
                                     if deblur:
-                                        d[cls_int] = 10
+                                        d[cls_int] = 5
                                     else:
                                         d[cls_int] = 1
                             else:
                                 dataset.set_deblur(True)
                                 if deblur:
-                                    see[id] = (frame_idx, {cls_int: 10})
+                                    see[id] = (frame_idx, {cls_int: 5})
                                 else:
                                     see[id] = (frame_idx, {cls_int: 1})
                                 keys.append(id)

@@ -257,7 +257,7 @@ def run(
 
                         cls_int = int(cls)
 
-                        if (bbox[0] >= tray[0][0] - 50 and bbox[1] >= tray[0][1] - 180 and bbox[2] <= tray[1][0] + 50 and
+                        if (bbox[0] >= tray[0][0] - 50 and bbox[1] >= tray[0][1] - 180 and bbox[2] <= tray[1][0] + 400 and
                                 bbox[3] <= tray[1][1] + 100):  # in tray area
                             # Entries are in the format of {unique_index:(timestamp_in_frame, {class: count})}
                             if id in see:

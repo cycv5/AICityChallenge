@@ -379,9 +379,12 @@ def run(
                     prev_count = cls_d[max_cls]
                     fd.write("{} {} {}\n".format(vid_id, max_cls+1, tstamp+5))
                 else:
-                    if prev_cls == max_cls and (prev_tstamp + prev_count - tstamp) < 60:
+                    if prev_cls == max_cls and (tstamp - prev_tstamp - prev_count) < 60:
                         # Enforcing that if you are writing consecutive entries with the same item
                         # there must be a time gap larger than 18 frames.
+                        if tstamp + cls_d[max_cls] > prev_tstamp + prev_count:
+                            prev_tstamp = tstamp
+                            prev_count = cls_d[max_cls]
                         continue
                     else:
                         prev_cls = max_cls

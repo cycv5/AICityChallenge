@@ -80,7 +80,8 @@ def run(
         vid_stride=1,  # video frame-rate stride
         retina_masks=False,
         result_dir="",
-        deblur_path=""
+        deblur_path="",
+        min_frame=18
 ):
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
@@ -368,8 +369,8 @@ def run(
         for i in keys:
             tstamp, cls_d = see[i]
             max_cls = max(cls_d)
-            if cls_d[max_cls] > 15:  # The count for this classification is > 15 frames
-                fd.write("{} {} {}\n".format(vid_id, max_cls, tstamp))
+            if cls_d[max_cls] > min_frame:  # The count for this classification is > 15 frames
+                fd.write("{} {} {}\n".format(vid_id, max_cls+1, tstamp))
 
 
 def parse_opt():
@@ -411,6 +412,7 @@ def parse_opt():
     parser.add_argument('--retina-masks', action='store_true', help='whether to plot masks in native resolution')
     parser.add_argument('--result-dir', help='where to save the result.txt file', default="", type=str)
     parser.add_argument('--deblur-path', help='path to pretrained deblur NAFNet file', default="/content/TBD/NAFNet/experiments/pretrained_models/NAFNet-REDS-width64.pth", type=str)
+    parser.add_argument('--min-frame', help='minimum number of frame for a detection', default=18, type=int)
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     opt.tracking_config = ROOT / 'trackers' / opt.tracking_method / 'configs' / (opt.tracking_method + '.yaml')

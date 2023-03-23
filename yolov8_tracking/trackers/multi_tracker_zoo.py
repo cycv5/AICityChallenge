@@ -1,6 +1,5 @@
 from trackers.strongsort.utils.parser import get_config
 
-
 def create_tracker(tracker_type, tracker_config, reid_weights, device, half):
     
     cfg = get_config()
@@ -47,6 +46,39 @@ def create_tracker(tracker_type, tracker_config, reid_weights, device, half):
             frame_rate=cfg.bytetrack.frame_rate
         )
         return bytetracker
+    
+    elif tracker_type == 'botsort':
+        from trackers.botsort.bot_sort import BoTSORT
+        botsort = BoTSORT(
+            reid_weights,
+            device,
+            half,
+            track_high_thresh=cfg.botsort.track_high_thresh,
+            new_track_thresh=cfg.botsort.new_track_thresh,
+            track_buffer =cfg.botsort.track_buffer,
+            match_thresh=cfg.botsort.match_thresh,
+            proximity_thresh=cfg.botsort.proximity_thresh,
+            appearance_thresh=cfg.botsort.appearance_thresh,
+            cmc_method =cfg.botsort.cmc_method,
+            frame_rate=cfg.botsort.frame_rate,
+            lambda_=cfg.botsort.lambda_
+        )
+        return botsort
+    elif tracker_type == 'deepocsort':
+        from trackers.deepocsort.ocsort import OCSort
+        botsort = OCSort(
+            reid_weights,
+            device,
+            half,
+            det_thresh=cfg.deepocsort.det_thresh,
+            max_age=cfg.deepocsort.max_age,
+            min_hits=cfg.deepocsort.min_hits,
+            iou_threshold=cfg.deepocsort.iou_thresh,
+            delta_t=cfg.deepocsort.delta_t,
+            asso_func=cfg.deepocsort.asso_func,
+            inertia=cfg.deepocsort.inertia,
+        )
+        return botsort
     else:
         print('No such tracker')
         exit()

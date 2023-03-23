@@ -257,8 +257,8 @@ def run(
 
                         cls_int = int(cls)
 
-                        if (bbox[0] >= tray[0][0] and bbox[1] >= tray[0][1] and bbox[2] <= tray[1][0] and
-                                bbox[3] <= tray[1][1]):  # in tray area
+                        if (bbox[0] >= tray[0][0] - 50 and bbox[1] >= tray[0][1] - 180 and bbox[2] <= tray[1][0] + 50 and
+                                bbox[3] <= tray[1][1] + 100):  # in tray area
                             # Entries are in the format of {unique_index:(timestamp_in_frame, {class: count})}
                             if id in see:
                                 d = see[id][1]
@@ -360,6 +360,9 @@ def run(
         strip_optimizer(yolo_weights)  # update model (to fix SourceChangeWarning)
 
     print(see)
+    prev_tstamp = -1
+    prev_cls = -1
+    prev_count = -1
     result_save = ROOT / "result.txt"
     if result_dir != "":
         result_save = str(result_dir).rstrip("/\\") + "/result.txt"
@@ -368,10 +371,23 @@ def run(
         vid_id = source.split("_")[-1][:-4]
         for i in keys:
             tstamp, cls_d = see[i]
-            max_cls = max(cls_d)
+            max_cls = max(cls_d, key=cls_d.get)
             if cls_d[max_cls] > min_frame:  # The count for this classification is > 15 frames
-                fd.write("{} {} {}\n".format(vid_id, max_cls+1, tstamp))
-
+                if prev_cls == -1:
+                    prev_cls = max_cls
+                    prev_tstamp = tstamp
+                    prev_count = cls_d[max_cls]
+                    fd.write("{} {} {}\n".format(vid_id, max_cls+1, tstamp+5))
+                else:
+                    if prev_cls == max_cls and (prev_tstamp + prev_count - tstamp) > 18:
+                        # Enforcing that if you are writing consecutive entries with the same item
+                        # there must be a time gap larger than 18 frames.
+                        continue
+                    else:
+                        prev_cls = max_cls
+                        prev_tstamp = tstamp
+                        prev_count = cls_d[max_cls]
+                        fd.write("{} {} {}\n".format(vid_id, max_cls + 1, tstamp+5))
 
 def parse_opt():
     parser = argparse.ArgumentParser()

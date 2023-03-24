@@ -7,9 +7,12 @@ cd mmsegmentation
 pip install -v -e .
 
 echo "Downloading weights"
-curl -L -s -o work_dirs.zip "https://drive.google.com/uc?id=1LNMQ6TGf1QaCjMgTExPzl7lFFs-yZyqX&confirm=t"
+mkdir work_dirs
+cd work_dirs
+curl -L -s -o work_dirs.zip "https://drive.google.com/uc?id=1PPtaV0TOh8XSv-oaP_0KMNzRJkNISmDT&confirm=t"
 unzip work_dirs.zip
 rm work_dirs.zip
+cd ..
 
 echo "Setting up deblur"
 cd ../../NAFNet

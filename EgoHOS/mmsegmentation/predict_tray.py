@@ -73,7 +73,7 @@ def predict_tray(img):
     seed = (int(w / 2), int(h / 2))
     (x0, y0), (x1, y1) = detect(img, seed=seed)
 
-    if x0 < 400 or x0 > 700 or y0 < 200 or y0 > 350 or x1 < 1150 or x1 > 1450 or y1 < 780 or y1 > 950:
+    if x0 < 390 or x0 > 700 or y0 < 200 or y0 > 450 or x1 < 1150 or x1 > 1450 or y1 < 780 or y1 > 1080:
         # a re-detect is needed
         seed = (seed[0] - 50, seed[1] - 50)
         (x0, y0), (x1, y1) = detect(img, seed=seed)

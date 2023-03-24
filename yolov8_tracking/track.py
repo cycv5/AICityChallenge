@@ -360,9 +360,27 @@ def run(
         strip_optimizer(yolo_weights)  # update model (to fix SourceChangeWarning)
 
     print(see)
+    keys.sort()
     prev_tstamp = -1
     prev_cls = -1
     prev_count = -1
+    sum_frame = 0
+    for j in range(len(keys) - 1, -1, -1):  # backwards
+        tstamp, cls_d = see[keys[j]]
+        max_cls = max(cls_d, key=cls_d.get)
+        sum_frame += cls_d[max_cls]
+        for retro in range(1, 4):
+            nxt_key = keys[j - retro] if j - retro >= 0 else -1
+            if nxt_key != -1:
+                ntstamp, ncls_d = see[keys[j - retro]]
+                nmax_cls = max(ncls_d, key=ncls_d.get)
+                if nmax_cls == max_cls and (tstamp - ntstamp - ncls_d[nmax_cls]) < 250:
+                    ncls_d[nmax_cls] += cls_d[max_cls]
+                    cls_d[max_cls] = 0
+                    break
+    threshold = int(sum_frame / len(keys))
+    if threshold > 18:
+        threshold = 18
     result_save = ROOT / "result.txt"
     if result_dir != "":
         result_save = str(result_dir).rstrip("/\\") + "/result.txt"
@@ -372,7 +390,7 @@ def run(
         for i in keys:
             tstamp, cls_d = see[i]
             max_cls = max(cls_d, key=cls_d.get)
-            if cls_d[max_cls] > min_frame:  # The count for this classification is > 15 frames
+            if cls_d[max_cls] > threshold:  # The count for this classification is > 15 frames
                 if prev_cls == -1:
                     prev_cls = max_cls
                     prev_tstamp = tstamp

@@ -365,6 +365,7 @@ def run(
     prev_cls = -1
     prev_count = -1
     sum_frame = 0
+    wait = 5
     for j in range(len(keys) - 1, -1, -1):  # backwards
         tstamp, cls_d = see[keys[j]]
         max_cls = max(cls_d, key=cls_d.get)
@@ -378,9 +379,14 @@ def run(
                     ncls_d[nmax_cls] += cls_d[max_cls]
                     cls_d[max_cls] = 0
                     break
+
+    avg_item = sum_frame / len(k)
     threshold = int(sum_frame / len(keys))
     if threshold > 18:
         threshold = 18
+        wait = 15
+    else:
+        threshold = min(10, threshold)
     result_save = ROOT / "result.txt"
     if result_dir != "":
         result_save = str(result_dir).rstrip("/\\") + "/result.txt"
@@ -389,15 +395,20 @@ def run(
         vid_id = source.split("_")[-1][:-4]
         for i in keys:
             tstamp, cls_d = see[i]
-            max_cls = max(cls_d, key=cls_d.get)
+            x = sorted(((v,k) for k,v in cls_d.items()))
+            max_cls = x[-1][1]
             if cls_d[max_cls] > threshold:  # The count for this classification is > 15 frames
+                frames = cls_d[max_cls]
+                added_frames = (frames // 10) if frames < 50 else 5
+                if len(x) > 1 and cls_d[x[-2][1]] > avg_item + 10:
+                    fd.write("{} {} {}".format(vid_id, x[-2][1] + 1, int(tstamp + wait - avg_item)))
                 if prev_cls == -1:
                     prev_cls = max_cls
                     prev_tstamp = tstamp
                     prev_count = cls_d[max_cls]
-                    fd.write("{} {} {}\n".format(vid_id, max_cls+1, tstamp+5))
+                    fd.write("{} {} {}\n".format(vid_id, max_cls+1, tstamp+wait+added_frames))
                 else:
-                    if prev_cls == max_cls and (tstamp - prev_tstamp - prev_count) < 60:
+                    if (prev_cls == max_cls and (tstamp - prev_tstamp - prev_count)< 60) or ((tstamp - prev_tstamp) < 9 and (tstamp - prev_tstamp) >= 0):
                         # Enforcing that if you are writing consecutive entries with the same item
                         # there must be a time gap larger than 18 frames.
                         if tstamp + cls_d[max_cls] > prev_tstamp + prev_count:

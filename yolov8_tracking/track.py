@@ -380,7 +380,7 @@ def run(
                     cls_d[max_cls] = 0
                     break
 
-    avg_item = sum_frame / len(k)
+    avg_item = sum_frame / len(keys)
     threshold = int(sum_frame / len(keys))
     if threshold > 18:
         threshold = 18
@@ -397,7 +397,7 @@ def run(
             tstamp, cls_d = see[i]
             x = sorted(((v,k) for k,v in cls_d.items()))
             max_cls = x[-1][1]
-            if cls_d[max_cls] > threshold:  # The count for this classification is > 15 frames
+            if cls_d[max_cls] > threshold:  # The count for this classification is > threshold
                 frames = cls_d[max_cls]
                 added_frames = (frames // 10) if frames < 50 else 5
                 if len(x) > 1 and cls_d[x[-2][1]] > avg_item + 10:
@@ -408,9 +408,9 @@ def run(
                     prev_count = cls_d[max_cls]
                     fd.write("{} {} {}\n".format(vid_id, max_cls+1, tstamp+wait+added_frames))
                 else:
-                    if (prev_cls == max_cls and (tstamp - prev_tstamp - prev_count)< 60) or ((tstamp - prev_tstamp) < 9 and (tstamp - prev_tstamp) >= 0):
+                    if (prev_cls == max_cls and (tstamp - prev_tstamp - prev_count) < 60) or ((tstamp - prev_tstamp) < 9 and (tstamp - prev_tstamp) >= 0):
                         # Enforcing that if you are writing consecutive entries with the same item
-                        # there must be a time gap larger than 18 frames.
+                        # there must be a time gap larger than threshold frames.
                         if tstamp + cls_d[max_cls] > prev_tstamp + prev_count:
                             prev_tstamp = tstamp
                             prev_count = cls_d[max_cls]

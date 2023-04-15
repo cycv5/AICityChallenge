@@ -459,7 +459,7 @@ def parse_opt():
     parser.add_argument('--vid-stride', type=int, default=1, help='video frame-rate stride')
     parser.add_argument('--retina-masks', action='store_true', help='whether to plot masks in native resolution')
     parser.add_argument('--result-dir', help='where to save the result.txt file', default="", type=str)
-    parser.add_argument('--deblur-path', help='path to pretrained deblur NAFNet file', default="/content/TBD/NAFNet/experiments/pretrained_models/NAFNet-REDS-width64.pth", type=str)
+    parser.add_argument('--deblur-path', help='path to pretrained deblur NAFNet file', default="/content/AICityChallenge/NAFNet/experiments/pretrained_models/NAFNet-REDS-width64.pth", type=str)
     parser.add_argument('--min-frame', help='minimum number of frame for a detection', default=18, type=int)
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand

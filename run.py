@@ -9,7 +9,7 @@ def main(img_dir, save_dir, weights):
         if "gitkeep" not in f:
             os.system("python yolov8_tracking/track.py --yolo-weights " + weights
                       + " --tracking-method strongsort --source " + f +
-                      " --save-vid --imgsz 960 --deblur-path \"/content/TBD/NAFNet/experiments/pretrained_models/NAFNet-REDS-width64.pth\" --result-dir " + save_dir)
+                      " --save-vid --imgsz 960 --deblur-path \"/content/AICityChallenge/NAFNet/experiments/pretrained_models/NAFNet-REDS-width64.pth\" --result-dir " + save_dir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="")

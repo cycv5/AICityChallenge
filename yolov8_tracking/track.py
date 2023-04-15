@@ -401,7 +401,7 @@ def run(
                 frames = cls_d[max_cls]
                 added_frames = (frames // 10) if frames < 50 else 5
                 if len(x) > 1 and cls_d[x[-2][1]] > avg_item + 10:
-                    fd.write("{} {} {}".format(vid_id, x[-2][1] + 1, int(tstamp + wait - avg_item)))
+                    fd.write("{} {} {}\n".format(vid_id, x[-2][1] + 1, int(tstamp + wait - avg_item)))
                 if prev_cls == -1:
                     prev_cls = max_cls
                     prev_tstamp = tstamp

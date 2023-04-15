@@ -73,14 +73,14 @@ def predict_tray(img):
     seed = (int(w / 2), int(h / 2))
     (x0, y0), (x1, y1) = detect(img, seed=seed)
 
-    if x0 < 390 or x0 > 700 or y0 < 200 or y0 > 450 or x1 < 1150 or x1 > 1450 or y1 < 780 or y1 > 1080:
+    if x0 < 390 or x0 > 700 or y0 < 200 or y0 > 450 or x1 < 1150 or x1 > 1450 or y1 < 780 or y1 > 1080 or (y1-y0 > 650):
         # a re-detect is needed
         seed = (seed[0] - 50, seed[1] - 50)
         (x0, y0), (x1, y1) = detect(img, seed=seed)
     else:
         return (x0, y0), (x1, y1), True
 
-    if x0 < 400 or x0 > 700 or y0 < 200 or y0 > 350 or x1 < 1150 or x1 > 1450 or y1 < 780 or y1 > 950:
+    if x0 < 390 or x0 > 700 or y0 < 200 or y0 > 450 or x1 < 1150 or x1 > 1450 or y1 < 780 or y1 > 1080 or (y1-y0 > 650):
         # detect fail, wait for next
         (x0, y0), (x1, y1) = (500, 250), (1350, 880)
     else:
@@ -96,16 +96,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Uncomment next line for video, supply with img_path argument
-    # detect_video(args.img_path)
+    detect_video(args.img_path)
 
     # Detecting in images
-    image = cv2.imread(args.img_path)
-    coord1, coord2, _ = predict_tray(image)
-    out_image = cv2.rectangle(image, coord1, coord2, (0, 0, 255), 7)
-
-    if args.out_path == "":
-        cv2.imshow("Tray Detection Output", out_image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-    else:
-        cv2.imwrite(args.out_path, out_image)
+    # image = cv2.imread(args.img_path)
+    # coord1, coord2, _ = predict_tray(image)
+    # out_image = cv2.rectangle(image, coord1, coord2, (0, 0, 255), 7)
+    #
+    # if args.out_path == "":
+    #     cv2.imshow("Tray Detection Output", out_image)
+    #     cv2.waitKey(0)
+    #     cv2.destroyAllWindows()
+    # else:
+    #     cv2.imwrite(args.out_path, out_image)

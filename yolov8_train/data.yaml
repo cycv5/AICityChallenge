@@ -1,15 +1,21 @@
 # Train and val datasets 
 # With a file structure like
 # yolov8_train/
+#   - custom_data
 #       - train/
 #             - images/
 #                   - ....jpg
 #             - labels/
 #                   - ....txt
+#       - val/
+#             - images/
+#                   - ....jpg
+#             - labels/
+#                   - ....txt
 
-train: ~/AICityChallenge/yolov8_train/train/images
-val  : ~/AICityChallenge/yolov8_train/val/images
-test : ~/AICityChallenge/yolov8_train/val/images
+train: ~/AICityChallenge/yolov8_train/custom_data/train/images
+val  : ~/AICityChallenge/yolov8_train/custom_data/val/images
+test : ~/AICityChallenge/yolov8_train/custom_data/val/images
 
 # number of classes
 nc   : 117

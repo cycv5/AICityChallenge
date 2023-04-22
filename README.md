@@ -3,7 +3,7 @@
 
 ## Our software pipeline
 ![software_stack](./assets/software_stack.jpg)
-As shown in our software stack diagram, we have three main modules: preprocessing, training, and postprocessing. In preprocessing, we augmente the synthetic data to bridge the domain gap between the training and test sets. For the training module, our model utilizes a yolov8 network. For postprocessing, we propose novel methods such as retrospective rectification and selective deblurring to further improve the model's accuracy.
+As shown in our software stack diagram, we have three main modules: preprocessing, training, and postprocessing. In preprocessing, we augment the synthetic data to bridge the domain gap between the training and test sets. For the training module, our model utilizes a yolov8 network. For postprocessing, we propose novel methods such as retrospective rectification and selective deblurring to further improve the model's accuracy.
 
 ## Inference Instructions
 The inference can be run with some simple commands. The code is tested on Google Colab.
@@ -30,6 +30,6 @@ The inference can be run with some simple commands. The code is tested on Google
     `pip3 install split-folders[full]` and then 
     `splitfolders --ratio .9 .1 --output custom_data aug_data`
 4. Now you can run the python train.py script with the input parameters of your choice such as the number of epochs, batch size, GPU devices, learning rate, etc. In addition, you could also try ensemble learning by averaging the confidence score of different models, but we have the best model available in the shared link. Otherwise, you could use the default settings: `python3 train.py`
-5. The results will be saved in the `/run` directory.  
+5. The results will be saved in the `AICityChallenge/yolov8_train/runs` directory.  
 
 **Enjoy** 😄
